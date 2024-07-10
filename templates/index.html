@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"  type="text/css" href="/static/style.css">
+    <title>测试小站</title>
+</head>
+<body>
+    <div>
+        <h1>{% if message %} {{message}} {% endif %}</h1>
+        <h2>您好，{{ username }}，欢迎来到我的小站</h2>
+
+        {% if message == '管理员登录' %}
+        <a href="{{ url_for('grade') }}">管理员登录</a>
+        {% else %}
+        <a href="{{ url_for('grade_infos_vis') }}">游客登录</a>
+        {% endif %}
+        <a href="{{ url_for('user_login') }}">退出</a>
+
+        <br/>
+    </div>
+</body>
+</html>
+
