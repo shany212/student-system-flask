@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}学生管理 CRUD 示例 - 学生成绩管理系统{% endblock %}
+
+{% block page_title %}学生管理 CRUD 示例{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">CRUD 操作示例</h6>
+            </div>
+            <div class="card-body">
+                <p>本页面演示了学生管理系统的基本 CRUD (Create, Read, Update, Delete) 操作：</p>
+                <ul class="list-group mb-4">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>创建 (Create)</strong> - 添加新学生
+                        </div>
+                        <a href="{{ url_for('student_add') }}" class="btn btn-success btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i>添加学生
+                        </a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>读取 (Read)</strong> - 查看学生列表和详情
+                        </div>
+                        <a href="{{ url_for('students_list') }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-list-ul me-1"></i>学生列表
+                        </a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>更新 (Update)</strong> - 编辑学生信息
+                        </div>
+                        <span class="text-muted">请先从学生列表中选择学生</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>删除 (Delete)</strong> - 删除学生记录
+                        </div>
+                        <span class="text-muted">请先从学生列表中选择学生</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 快速操作示例 -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">添加学生示例</h6>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('student_add') }}" method="post" id="quickAddForm" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="student_id" class="form-label">学号 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="student_id" name="student_id" required maxlength="20" pattern="^[A-Za-z0-9]+$">
+                        <div class="invalid-feedback">请输入有效的学号（只能包含字母和数字）</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">姓名 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" required maxlength="100">
+                        <div class="invalid-feedback">请输入姓名</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gender" class="form-label">性别 <span class="text-danger">*</span></label>
+                        <select class="form-select" id="gender" name="gender" required>
+                            <option value="" selected disabled>请选择性别</option>
+                            <option value="male">男</option>
+                            <option value="female">女</option>
+                            <option value="other">其他</option>
+                        </select>
+                        <div class="invalid-feedback">请选择性别</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-save me-1"></i>快速添加学生
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">最近添加的学生</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>学号</th>
+                                <th>姓名</th>
+                                <th>性别</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students[:5] %}
+                            <tr>
+                                <td>{{ student.id }}</td>
+                                <td>{{ student.name }}</td>
+                                <td>
+                                    {% if student.gender == 'male' %}
+                                        <span class="badge bg-primary">男</span>
+                                    {% elif student.gender == 'female' %}
+                                        <span class="badge bg-danger">女</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">其他</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('student_view', student_id=student.id) }}" class="btn btn-info btn-sm">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('student_edit', student_id=student.id) }}" class="btn btn-warning btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-danger btn-sm quick-delete-btn" 
+                                                data-id="{{ student.id }}" data-name="{{ student.name }}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">暂无学生信息</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="quickDeleteModal" tabindex="-1" aria-labelledby="quickDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickDeleteModalLabel">确认删除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                确定要删除学生 <span id="quickStudentName" class="fw-bold"></span> 吗？此操作不可恢复，学生的所有成绩记录也将被删除。
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <form id="quickDeleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger">确认删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const form = document.getElementById('quickAddForm');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        }
+        
+        // Delete confirmation
+        const deleteButtons = document.querySelectorAll('.quick-delete-btn');
+        const deleteForm = document.getElementById('quickDeleteForm');
+        const studentNameSpan = document.getElementById('quickStudentName');
+        const deleteModal = new bootstrap.Modal(document.getElementById('quickDeleteModal'));
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const studentId = this.getAttribute('data-id');
+                const studentName = this.getAttribute('data-name');
+                
+                deleteForm.action = `/students/delete/${studentId}`;
+                studentNameSpan.textContent = `${studentId} (${studentName})`;
+                deleteModal.show();
+            });
+        });
+    });
+</script>
+{% endblock %} 

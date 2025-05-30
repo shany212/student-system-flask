@@ -1,29 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet"  type="text/css" href="/static/style.css">
-    <title>登录</title>
+    <title>登录 - 学生成绩管理系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            background-color: #f5f5f5;
+            background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .form-signin {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+            margin: auto;
+        }
+        
+        .form-signin .card {
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .form-signin .card-header {
+            background-color: #4e73df;
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            border-bottom: none;
+        }
+        
+        .form-signin .card-body {
+            padding: 2rem;
+        }
+        
+        .form-signin .form-floating {
+            margin-bottom: 1rem;
+        }
+        
+        .form-signin .form-control {
+            height: calc(3.5rem + 2px);
+            padding: 1rem 0.75rem;
+        }
+        
+        .form-signin .form-control:focus {
+            box-shadow: none;
+            border-color: #4e73df;
+        }
+        
+        .form-signin .btn-primary {
+            background-color: #4e73df;
+            border-color: #4e73df;
+            padding: 0.75rem;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        
+        .form-signin .btn-primary:hover {
+            background-color: #2e59d9;
+            border-color: #2653d4;
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .form-signin a {
+            color: #4e73df;
+            text-decoration: none;
+        }
+        
+        .form-signin a:hover {
+            text-decoration: underline;
+        }
+        
+        .system-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #4e73df;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .alert {
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
 </head>
 <body>
-    <div>
-    <h1>用户登录</h1>
-    <!--将登陆信息放到一个form中-->
-    <form method="POST">
-        <input type="text" name="username" placeholder="请输入用户名" />
-        <br/>
-        <input type="password" name="password" placeholder="请输入密码（小于12位）" />
-        <br/>
-         <!--jinja2的函数-->
-        {% if message %} {{message}} {% endif %}
-        <br/>
-        <input type="submit" value="登录" />
-        <input type="reset" value="重置" />
-        <!--跳转到register的页面-->
-        <a href="{{ url_for('register') }}">注册</a>
-    </form>
-    </div>
+    <main class="form-signin">
+        <h1 class="system-title">学生成绩管理系统</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2 class="fw-normal mb-0"><i class="bi bi-person-circle me-2"></i>用户登录</h2>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                
+                <form action="{{ url_for('login') }}" method="post">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="username" name="username" placeholder="用户名" required>
+                        <label for="username">用户名</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="密码" required>
+                        <label for="password">密码</label>
+                    </div>
+                    
+                    <button class="w-100 btn btn-lg btn-primary" type="submit">登录</button>
+                    
+                    <div class="text-center mt-3">
+                        <span>还没有账号？</span>
+                        <a href="{{ url_for('register') }}">立即注册</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <p class="mt-4 text-center text-muted">&copy; 2023 学生成绩管理系统</p>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 

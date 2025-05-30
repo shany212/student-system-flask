@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}控制面板 - 学生成绩管理系统{% endblock %}
+
+{% block page_title %}控制面板{% endblock %}
+
+{% block content %}
+<!-- CRUD Operations Section -->
+{% if session.get('is_admin') %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">基本数据管理 (CRUD)</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card border-left-primary mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-people me-2"></i>学生管理</h5>
+                        <p class="text-muted small mb-2">添加、查看、编辑和删除学生信息</p>
+                        <div class="btn-group" role="group">
+                            <a href="{{ url_for('student_crud_example') }}" class="btn btn-primary">
+                                <i class="bi bi-code-slash me-1"></i>操作示例
+                            </a>
+                            <a href="{{ url_for('students_list') }}" class="btn btn-outline-primary">
+                                <i class="bi bi-list-ul me-1"></i>学生列表
+                            </a>
+                            <a href="{{ url_for('student_add') }}" class="btn btn-outline-primary">
+                                <i class="bi bi-plus-circle me-1"></i>添加
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-left-success mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-book me-2"></i>课程管理</h5>
+                        <p class="text-muted small mb-2">添加、查看、编辑和删除课程信息</p>
+                        <div class="btn-group" role="group">
+                            <a href="{{ url_for('course_crud_example') }}" class="btn btn-success">
+                                <i class="bi bi-code-slash me-1"></i>操作示例
+                            </a>
+                            <a href="{{ url_for('courses_list') }}" class="btn btn-outline-success">
+                                <i class="bi bi-list-ul me-1"></i>课程列表
+                            </a>
+                            <a href="{{ url_for('course_add') }}" class="btn btn-outline-success">
+                                <i class="bi bi-plus-circle me-1"></i>添加
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Statistics Cards -->
+<div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">学生总数</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ student_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-people fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">课程总数</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ course_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-book fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">成绩记录</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ grade_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-clipboard-data fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">平均成绩</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ avg_grade|round(2) }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-award fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Access Cards -->
+<div class="row">
+    <!-- Student Card -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">学生管理</h6>
+                <a href="{{ url_for('students_list') }}" class="btn btn-sm btn-primary">
+                    查看全部
+                </a>
+            </div>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center" style="min-height: 200px;">
+                <i class="bi bi-people mb-3" style="font-size: 3rem; color: #4e73df;"></i>
+                <h5 class="mb-2">学生信息管理</h5>
+                <p class="text-muted mb-3">管理学生信息、查看学生成绩等</p>
+                <div class="d-flex">
+                    <a href="{{ url_for('students_list') }}" class="btn btn-primary me-2">
+                        <i class="bi bi-list-ul me-1"></i>学生列表
+                    </a>
+                    {% if session.get('is_admin') %}
+                    <a href="{{ url_for('student_add') }}" class="btn btn-success me-2">
+                        <i class="bi bi-plus-circle me-1"></i>添加学生
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Course Card -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">课程管理</h6>
+                <a href="{{ url_for('courses_list') }}" class="btn btn-sm btn-primary">
+                    查看全部
+                </a>
+            </div>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center" style="min-height: 200px;">
+                <i class="bi bi-book mb-3" style="font-size: 3rem; color: #1cc88a;"></i>
+                <h5 class="mb-2">课程信息管理</h5>
+                <p class="text-muted mb-3">管理课程信息、查看课程成绩等</p>
+                <div class="d-flex">
+                    <a href="{{ url_for('courses_list') }}" class="btn btn-primary me-2">
+                        <i class="bi bi-list-ul me-1"></i>课程列表
+                    </a>
+                    {% if session.get('is_admin') %}
+                    <a href="{{ url_for('course_add') }}" class="btn btn-success me-2">
+                        <i class="bi bi-plus-circle me-1"></i>添加课程
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grade Management & Import -->
+{% if session.get('is_admin') %}
+<div class="row">
+    <!-- Grade Management -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">成绩管理</h6>
+            </div>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center" style="min-height: 200px;">
+                <i class="bi bi-clipboard-check mb-3" style="font-size: 3rem; color: #36b9cc;"></i>
+                <h5 class="mb-2">成绩记录管理</h5>
+                <p class="text-muted mb-3">添加、修改、删除学生成绩记录</p>
+                <a href="{{ url_for('grade_add') }}" class="btn btn-info">
+                    <i class="bi bi-plus-circle me-1"></i>添加成绩
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Import Grades -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">批量导入</h6>
+            </div>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center" style="min-height: 200px;">
+                <i class="bi bi-file-earmark-excel mb-3" style="font-size: 3rem; color: #f6c23e;"></i>
+                <h5 class="mb-2">批量导入成绩</h5>
+                <p class="text-muted mb-3">通过CSV文件批量导入学生成绩</p>
+                <a href="{{ url_for('import_grades') }}" class="btn btn-warning">
+                    <i class="bi bi-upload me-1"></i>导入成绩
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Charts -->
+<div class="row">
+    <!-- Course Average Chart -->
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">各课程平均成绩</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="courseAverageChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Grade Distribution Pie Chart -->
+    <div class="col-lg-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">成绩分布</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-pie pt-4 pb-2">
+                    <canvas id="gradeDistributionChart"></canvas>
+                </div>
+                <div class="mt-4 text-center small">
+                    <span class="me-2">
+                        <i class="bi bi-circle-fill text-danger"></i> 不及格
+                    </span>
+                    <span class="me-2">
+                        <i class="bi bi-circle-fill text-warning"></i> 及格
+                    </span>
+                    <span class="me-2">
+                        <i class="bi bi-circle-fill text-success"></i> 良好
+                    </span>
+                    <span class="me-2">
+                        <i class="bi bi-circle-fill text-primary"></i> 优秀
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Course Average Chart
+        const courseCtx = document.getElementById('courseAverageChart').getContext('2d');
+        const courseAverageChart = new Chart(courseCtx, {
+            type: 'bar',
+            data: {
+                labels: JSON.parse('{{ course_names|tojson|safe }}'),
+                datasets: [{
+                    label: '平均分',
+                    data: JSON.parse('{{ course_avgs|tojson|safe }}'),
+                    backgroundColor: 'rgba(78, 115, 223, 0.8)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: '平均分'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '课程'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Grade Distribution Chart
+        const distCtx = document.getElementById('gradeDistributionChart').getContext('2d');
+        const gradeDistributionChart = new Chart(distCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['不及格 (< 60)', '及格 (60-79)', '良好 (80-89)', '优秀 (≥ 90)'],
+                datasets: [{
+                    data: JSON.parse('{{ grade_dist|tojson|safe }}'),
+                    backgroundColor: ['#e74a3b', '#f6c23e', '#1cc88a', '#4e73df'],
+                    hoverBackgroundColor: ['#be3c2e', '#d9a730', '#17a673', '#2e59d9'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)"
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

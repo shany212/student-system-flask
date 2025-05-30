@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+
+{% block title %}课程详情 - {{ course.name }} - 学生成绩管理系统{% endblock %}
+
+{% block page_title %}课程详情{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Course Info Card -->
+    <div class="col-lg-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">课程信息</h6>
+                {% if session.get('is_admin') %}
+                <a href="{{ url_for('course_edit', course_id=course.id) }}" class="btn btn-warning btn-sm">
+                    <i class="bi bi-pencil me-1"></i>编辑
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="bi bi-book-fill" style="font-size: 5rem; color: #4e73df;"></i>
+                    <h4 class="mt-3">{{ course.name }}</h4>
+                    <span class="badge bg-primary rounded-pill">{{ course.credit }} 学分</span>
+                </div>
+                
+                <div class="mb-2">
+                    <strong><i class="bi bi-hash me-2"></i>课程编号：</strong>
+                    <span>{{ course.id }}</span>
+                </div>
+                
+                {% if course.description %}
+                <div class="mb-2">
+                    <strong><i class="bi bi-card-text me-2"></i>课程描述：</strong>
+                    <p class="mt-2">{{ course.description }}</p>
+                </div>
+                {% endif %}
+                
+                <div class="mb-2">
+                    <strong><i class="bi bi-clock-history me-2"></i>创建时间：</strong>
+                    <span>{{ course.created_at }}</span>
+                </div>
+                
+                <div class="mb-2">
+                    <strong><i class="bi bi-calendar-check me-2"></i>最后更新：</strong>
+                    <span>{{ course.updated_at or course.created_at }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Grades Card -->
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">成绩信息</h6>
+                <div>
+                    <span class="badge bg-info me-2" style="font-size: 1rem;">
+                        选课人数: {{ grades|length }}
+                    </span>
+                    {% if session.get('is_admin') %}
+                    <a href="{{ url_for('grade_add') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i>添加成绩
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                {% if grades %}
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="gradesTable" width="100%" cellspacing="0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>学号</th>
+                                <th>学生</th>
+                                <th>学期</th>
+                                <th>成绩</th>
+                                {% if session.get('is_admin') %}
+                                <th>操作</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for grade in grades %}
+                            <tr>
+                                <td>{{ grade.student_id }}</td>
+                                <td>{{ grade.student_name }}</td>
+                                <td>{{ grade.semester }}</td>
+                                <td>
+                                    <span class="badge 
+                                          {% if grade.score < 60 %}bg-danger
+                                          {% elif grade.score < 80 %}bg-warning
+                                          {% elif grade.score < 90 %}bg-success
+                                          {% else %}bg-primary{% endif %}"
+                                          style="font-size: 0.9rem;">
+                                        {{ grade.score }}
+                                    </span>
+                                </td>
+                                {% if session.get('is_admin') %}
+                                <td>
+                                    <button type="button" class="btn btn-warning btn-sm edit-grade-btn" 
+                                            data-id="{{ grade.id }}" data-score="{{ grade.score }}">
+                                        <i class="bi bi-pencil"></i> 修改
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm delete-grade-btn" 
+                                            data-id="{{ grade.id }}" data-student="{{ grade.student_name }}">
+                                        <i class="bi bi-trash"></i> 删除
+                                    </button>
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-exclamation-circle" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="mt-3 text-muted">暂无成绩记录</p>
+                    {% if session.get('is_admin') %}
+                    <a href="{{ url_for('grade_add') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>添加成绩
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Grade Chart -->
+        {% if grades %}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">成绩分布</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="chart-area">
+                            <canvas id="scoreDistributionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="chart-area">
+                            <canvas id="scorePieChart"></canvas>
+                        </div>
+                        <div class="mt-4 text-center small">
+                            <span class="mr-2">
+                                <i class="bi bi-circle-fill text-danger"></i> 不及格 (< 60)
+                            </span>
+                            <span class="mr-2">
+                                <i class="bi bi-circle-fill text-warning"></i> 及格 (60-79)
+                            </span>
+                            <span class="mr-2">
+                                <i class="bi bi-circle-fill text-success"></i> 良好 (80-89)
+                            </span>
+                            <span class="mr-2">
+                                <i class="bi bi-circle-fill text-primary"></i> 优秀 (≥ 90)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Edit Grade Modal -->
+{% if session.get('is_admin') %}
+<div class="modal fade" id="editGradeModal" tabindex="-1" aria-labelledby="editGradeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editGradeModalLabel">修改成绩</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editGradeForm">
+                    <div class="mb-3">
+                        <label for="editScore" class="form-label">成绩</label>
+                        <input type="number" class="form-control" id="editScore" name="score" min="0" max="100" step="0.1" required>
+                        <div class="invalid-feedback">请输入有效的成绩（0-100）</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveGradeBtn">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Grade Modal -->
+<div class="modal fade" id="deleteGradeModal" tabindex="-1" aria-labelledby="deleteGradeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteGradeModalLabel">确认删除成绩</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                确定要删除 <span id="studentName" class="fw-bold"></span> 的成绩记录吗？此操作不可恢复。
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <form id="deleteGradeForm" method="POST">
+                    <button type="submit" class="btn btn-danger">确认删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="d-flex justify-content-start mt-3 mb-5">
+    <a href="{{ url_for('courses_list') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-1"></i>返回课程列表
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if grades %}
+        // Prepare data for charts
+        const scores = [
+            {% for grade in grades %}
+                {{ grade.score }}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+        
+        // Calculate score distribution
+        const failCount = scores.filter(score => score < 60).length;
+        const passCount = scores.filter(score => score >= 60 && score < 80).length;
+        const goodCount = scores.filter(score => score >= 80 && score < 90).length;
+        const excellentCount = scores.filter(score => score >= 90).length;
+        
+        // Score distribution chart
+        const scoreDistCtx = document.getElementById('scoreDistributionChart').getContext('2d');
+        const scoreDistChart = new Chart(scoreDistCtx, {
+            type: 'bar',
+            data: {
+                labels: ['0-59', '60-69', '70-79', '80-89', '90-100'],
+                datasets: [{
+                    label: '学生人数',
+                    data: [
+                        scores.filter(score => score < 60).length,
+                        scores.filter(score => score >= 60 && score < 70).length,
+                        scores.filter(score => score >= 70 && score < 80).length,
+                        scores.filter(score => score >= 80 && score < 90).length,
+                        scores.filter(score => score >= 90).length
+                    ],
+                    backgroundColor: [
+                        'rgba(231, 74, 59, 0.8)',
+                        'rgba(246, 194, 62, 0.8)',
+                        'rgba(246, 194, 62, 0.8)',
+                        'rgba(28, 200, 138, 0.8)',
+                        'rgba(78, 115, 223, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(231, 74, 59, 1)',
+                        'rgba(246, 194, 62, 1)',
+                        'rgba(246, 194, 62, 1)',
+                        'rgba(28, 200, 138, 1)',
+                        'rgba(78, 115, 223, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '学生人数'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '分数段'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Score pie chart
+        const scorePieCtx = document.getElementById('scorePieChart').getContext('2d');
+        const scorePieChart = new Chart(scorePieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['不及格 (< 60)', '及格 (60-79)', '良好 (80-89)', '优秀 (≥ 90)'],
+                datasets: [{
+                    data: [failCount, passCount, goodCount, excellentCount],
+                    backgroundColor: ['#e74a3b', '#f6c23e', '#1cc88a', '#4e73df'],
+                    hoverBackgroundColor: ['#be3c2e', '#d9a730', '#17a673', '#2e59d9'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        {% endif %}
+        
+        {% if session.get('is_admin') and grades %}
+        // Edit grade functionality
+        const editGradeButtons = document.querySelectorAll('.edit-grade-btn');
+        const editGradeModal = new bootstrap.Modal(document.getElementById('editGradeModal'));
+        const editScoreInput = document.getElementById('editScore');
+        const saveGradeBtn = document.getElementById('saveGradeBtn');
+        let currentGradeId;
+        
+        editGradeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                currentGradeId = this.getAttribute('data-id');
+                const currentScore = this.getAttribute('data-score');
+                
+                editScoreInput.value = currentScore;
+                editGradeModal.show();
+            });
+        });
+        
+        saveGradeBtn.addEventListener('click', function() {
+            if (!editScoreInput.checkValidity()) {
+                editScoreInput.classList.add('is-invalid');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('grade_id', currentGradeId);
+            formData.append('score', editScoreInput.value);
+            
+            fetch('/grades/update', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    editGradeModal.hide();
+                    window.location.reload();
+                } else {
+                    alert('修改成绩失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('修改成绩失败，请重试');
+            });
+        });
+        
+        // Delete grade confirmation
+        const deleteGradeButtons = document.querySelectorAll('.delete-grade-btn');
+        const deleteGradeForm = document.getElementById('deleteGradeForm');
+        const studentNameSpan = document.getElementById('studentName');
+        const deleteGradeModal = new bootstrap.Modal(document.getElementById('deleteGradeModal'));
+        
+        deleteGradeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const gradeId = this.getAttribute('data-id');
+                const studentName = this.getAttribute('data-student');
+                
+                deleteGradeForm.action = `/grades/delete/${gradeId}`;
+                studentNameSpan.textContent = studentName;
+                deleteGradeModal.show();
+            });
+        });
+        {% endif %}
+    });
+</script>
+{% endblock %} 

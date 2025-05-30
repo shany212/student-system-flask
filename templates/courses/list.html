@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}课程列表 - 学生成绩管理系统{% endblock %}
+
+{% block page_title %}课程列表{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">课程信息</h6>
+        {% if session.get('is_admin') %}
+        <a href="{{ url_for('course_add') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i>添加课程
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="搜索课程...">
+                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <table class="table table-bordered table-hover" id="coursesTable" width="100%" cellspacing="0">
+                <thead class="table-light">
+                    <tr>
+                        <th>课程编号</th>
+                        <th>课程名称</th>
+                        <th>学分</th>
+                        <th>描述</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in courses %}
+                    <tr>
+                        <td>{{ course.id }}</td>
+                        <td>{{ course.name }}</td>
+                        <td>{{ course.credit }}</td>
+                        <td>{{ course.description|truncate(50) or '-' }}</td>
+                        <td>
+                            <a href="{{ url_for('course_view', course_id=course.id) }}" class="btn btn-info btn-sm">
+                                <i class="bi bi-eye"></i> 查看
+                            </a>
+                            {% if session.get('is_admin') %}
+                            <a href="{{ url_for('course_edit', course_id=course.id) }}" class="btn btn-warning btn-sm">
+                                <i class="bi bi-pencil"></i> 编辑
+                            </a>
+                            <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="{{ course.id }}" data-name="{{ course.name }}">
+                                <i class="bi bi-trash"></i> 删除
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">暂无课程信息</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">确认删除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                确定要删除课程 <span id="courseName" class="fw-bold"></span> 吗？此操作不可恢复，所有与该课程相关的成绩记录也将被删除。
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger">确认删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Delete confirmation
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        const deleteForm = document.getElementById('deleteForm');
+        const courseNameSpan = document.getElementById('courseName');
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const courseId = this.getAttribute('data-id');
+                const courseName = this.getAttribute('data-name');
+                
+                deleteForm.action = `/courses/delete/${courseId}`;
+                courseNameSpan.textContent = `${courseId} (${courseName})`;
+                deleteModal.show();
+            });
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const table = document.getElementById('coursesTable');
+        const rows = table.querySelectorAll('tbody tr');
+        
+        function filterTable() {
+            const searchText = searchInput.value.toLowerCase();
+            
+            rows.forEach(row => {
+                const id = row.cells[0].textContent.toLowerCase();
+                const name = row.cells[1].textContent.toLowerCase();
+                const description = row.cells[3].textContent.toLowerCase();
+                
+                if (id.includes(searchText) || 
+                    name.includes(searchText) || 
+                    description.includes(searchText)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        searchButton.addEventListener('click', filterTable);
+        searchInput.addEventListener('keyup', filterTable);
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}课程管理 CRUD 示例 - 学生成绩管理系统{% endblock %}
+
+{% block page_title %}课程管理 CRUD 示例{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">CRUD 操作示例</h6>
+            </div>
+            <div class="card-body">
+                <p>本页面演示了课程管理系统的基本 CRUD (Create, Read, Update, Delete) 操作：</p>
+                <ul class="list-group mb-4">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>创建 (Create)</strong> - 添加新课程
+                        </div>
+                        <a href="{{ url_for('course_add') }}" class="btn btn-success btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i>添加课程
+                        </a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>读取 (Read)</strong> - 查看课程列表和详情
+                        </div>
+                        <a href="{{ url_for('courses_list') }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-list-ul me-1"></i>课程列表
+                        </a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>更新 (Update)</strong> - 编辑课程信息
+                        </div>
+                        <span class="text-muted">请先从课程列表中选择课程</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>删除 (Delete)</strong> - 删除课程记录
+                        </div>
+                        <span class="text-muted">请先从课程列表中选择课程</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 快速操作示例 -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">添加课程示例</h6>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('course_add') }}" method="post" id="quickAddForm" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="course_id" class="form-label">课程编号 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="course_id" name="course_id" required maxlength="20" pattern="^[A-Za-z0-9]+$">
+                        <div class="invalid-feedback">请输入有效的课程编号（只能包含字母和数字）</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">课程名称 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" required maxlength="100">
+                        <div class="invalid-feedback">请输入课程名称</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="credit" class="form-label">学分 <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="credit" name="credit" required min="0" max="10" step="0.5" value="3.0">
+                        <div class="invalid-feedback">请输入有效的学分（0-10）</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-save me-1"></i>快速添加课程
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">最近添加的课程</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>课程编号</th>
+                                <th>课程名称</th>
+                                <th>学分</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in courses[:5] %}
+                            <tr>
+                                <td>{{ course.id }}</td>
+                                <td>{{ course.name }}</td>
+                                <td>{{ course.credit }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('course_view', course_id=course.id) }}" class="btn btn-info btn-sm">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('course_edit', course_id=course.id) }}" class="btn btn-warning btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-danger btn-sm quick-delete-btn" 
+                                                data-id="{{ course.id }}" data-name="{{ course.name }}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">暂无课程信息</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="quickDeleteModal" tabindex="-1" aria-labelledby="quickDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickDeleteModalLabel">确认删除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                确定要删除课程 <span id="quickCourseName" class="fw-bold"></span> 吗？此操作不可恢复，所有与该课程相关的成绩记录也将被删除。
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <form id="quickDeleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger">确认删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const form = document.getElementById('quickAddForm');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        }
+        
+        // Delete confirmation
+        const deleteButtons = document.querySelectorAll('.quick-delete-btn');
+        const deleteForm = document.getElementById('quickDeleteForm');
+        const courseNameSpan = document.getElementById('quickCourseName');
+        const deleteModal = new bootstrap.Modal(document.getElementById('quickDeleteModal'));
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const courseId = this.getAttribute('data-id');
+                const courseName = this.getAttribute('data-name');
+                
+                deleteForm.action = `/courses/delete/${courseId}`;
+                courseNameSpan.textContent = `${courseId} (${courseName})`;
+                deleteModal.show();
+            });
+        });
+    });
+</script>
+{% endblock %} 

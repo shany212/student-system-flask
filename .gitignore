@@ -1,0 +1,39 @@
+# Python虚拟环境
+.venv/
+env/
+venv/
+ENV/
+
+# Python编译文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 数据库文件
+*.db
+*.sqlite3
+
+# 日志文件
+*.log
+
+# 本地配置文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 上传目录可能包含用户数据，根据需要决定是否包含
+# uploads/
+
+# IDE相关文件
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db 

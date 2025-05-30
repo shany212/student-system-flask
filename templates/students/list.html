@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}学生列表 - 学生成绩管理系统{% endblock %}
+
+{% block page_title %}学生列表{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">学生信息</h6>
+        {% if session.get('is_admin') %}
+        <a href="{{ url_for('student_add') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i>添加学生
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <div class="mb-3 row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchInput" placeholder="搜索学生...">
+                        <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <select class="form-select d-inline-block w-auto" id="genderFilter">
+                        <option value="all">所有性别</option>
+                        <option value="male">男</option>
+                        <option value="female">女</option>
+                        <option value="other">其他</option>
+                    </select>
+                </div>
+            </div>
+            
+            <table class="table table-bordered table-hover" id="studentsTable" width="100%" cellspacing="0">
+                <thead class="table-light">
+                    <tr>
+                        <th>学号</th>
+                        <th>姓名</th>
+                        <th>性别</th>
+                        <th>邮箱</th>
+                        <th>电话</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.id }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>
+                            {% if student.gender == 'male' %}
+                                <span class="badge bg-primary">男</span>
+                            {% elif student.gender == 'female' %}
+                                <span class="badge bg-danger">女</span>
+                            {% else %}
+                                <span class="badge bg-secondary">其他</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ student.email or '-' }}</td>
+                        <td>{{ student.phone or '-' }}</td>
+                        <td>
+                            <a href="{{ url_for('student_view', student_id=student.id) }}" class="btn btn-info btn-sm">
+                                <i class="bi bi-eye"></i> 查看
+                            </a>
+                            {% if session.get('is_admin') %}
+                            <a href="{{ url_for('student_edit', student_id=student.id) }}" class="btn btn-warning btn-sm">
+                                <i class="bi bi-pencil"></i> 编辑
+                            </a>
+                            <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="{{ student.id }}" data-name="{{ student.name }}">
+                                <i class="bi bi-trash"></i> 删除
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">暂无学生信息</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">确认删除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                确定要删除学生 <span id="studentName" class="fw-bold"></span> 吗？此操作不可恢复，学生的所有成绩记录也将被删除。
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger">确认删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Delete confirmation
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        const deleteForm = document.getElementById('deleteForm');
+        const studentNameSpan = document.getElementById('studentName');
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const studentId = this.getAttribute('data-id');
+                const studentName = this.getAttribute('data-name');
+                
+                deleteForm.action = `/students/delete/${studentId}`;
+                studentNameSpan.textContent = `${studentId} (${studentName})`;
+                deleteModal.show();
+            });
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const table = document.getElementById('studentsTable');
+        const rows = table.querySelectorAll('tbody tr');
+        
+        function filterTable() {
+            const searchText = searchInput.value.toLowerCase();
+            const genderFilter = document.getElementById('genderFilter').value;
+            
+            rows.forEach(row => {
+                const id = row.cells[0].textContent.toLowerCase();
+                const name = row.cells[1].textContent.toLowerCase();
+                const gender = row.cells[2].textContent.toLowerCase();
+                
+                const genderMatch = genderFilter === 'all' || 
+                                  (genderFilter === 'male' && gender.includes('男')) ||
+                                  (genderFilter === 'female' && gender.includes('女')) ||
+                                  (genderFilter === 'other' && gender.includes('其他'));
+                
+                const textMatch = id.includes(searchText) || 
+                                name.includes(searchText);
+                
+                if (textMatch && genderMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        searchButton.addEventListener('click', filterTable);
+        searchInput.addEventListener('keyup', filterTable);
+        document.getElementById('genderFilter').addEventListener('change', filterTable);
+    });
+</script>
+{% endblock %} 

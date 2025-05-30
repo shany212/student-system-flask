@@ -1,0 +1,154 @@
+/* Custom styles for the Student Management System */
+
+/* Card styles */
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+.border-left-danger {
+    border-left: 0.25rem solid #e74a3b !important;
+}
+
+/* Chart containers */
+.chart-area {
+    position: relative;
+    height: 20rem;
+    width: 100%;
+}
+
+.chart-pie {
+    position: relative;
+    height: 15rem;
+}
+
+/* Dashboard card styles */
+.card .card-header {
+    font-weight: bold;
+    background: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.text-xs {
+    font-size: .7rem;
+}
+
+.text-gray-800 {
+    color: #5a5c69 !important;
+}
+
+.text-gray-300 {
+    color: #dddfeb !important;
+}
+
+/* Avatar colors for badge icons */
+.bi-circle-fill.text-danger {
+    color: #e74a3b !important;
+}
+
+.bi-circle-fill.text-warning {
+    color: #f6c23e !important;
+}
+
+.bi-circle-fill.text-success {
+    color: #1cc88a !important;
+}
+
+.bi-circle-fill.text-primary {
+    color: #4e73df !important;
+}
+
+/* Navigation styling */
+.sidebar .nav-item .nav-link {
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar .nav-item .nav-link i {
+    font-size: 0.85rem;
+    margin-right: 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        min-height: auto;
+    }
+    
+    .chart-area, .chart-pie {
+        height: 15rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem;
+    }
+}
+
+/* Form adjustments */
+.form-control:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+}
+
+/* Button hover effects */
+.btn-primary:hover, .btn-info:hover, .btn-warning:hover, .btn-danger:hover {
+    transform: translateY(-2px);
+    transition: all 0.2s;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+}
+
+/* Table adjustments */
+.table-bordered th, .table-bordered td {
+    vertical-align: middle;
+}
+
+/* Badge styles */
+.badge {
+    padding: 0.5em 0.75em;
+}
+
+/* Animation for flash messages */
+.alert {
+    animation: fadeInDown 0.5s ease;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Additional helper classes */
+.text-muted {
+    color: #858796 !important;
+}
+
+.font-weight-bold {
+    font-weight: 700 !important;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+} 

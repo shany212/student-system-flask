@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}批量导入成绩 - 学生成绩管理系统{% endblock %}
+
+{% block page_title %}批量导入成绩{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">批量导入成绩</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="mb-4">
+                    <h5 class="mb-3">上传成绩文件</h5>
+                    <form action="{{ url_for('import_grades') }}" method="post" enctype="multipart/form-data" id="importForm" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="file" class="form-label">选择CSV文件 <span class="text-danger">*</span></label>
+                            <input class="form-control" type="file" id="file" name="file" accept=".csv" required>
+                            <div class="invalid-feedback">请选择CSV文件</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-cloud-upload me-1"></i>上传并导入
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="mt-4">
+                    <h5 class="mb-3">导入说明</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            文件必须是CSV格式，编码为UTF-8
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            第一行必须是表头，包含以下字段：student_id, course_id, score, semester
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            student_id必须是已存在的学生ID
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            course_id必须是已存在的课程ID
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            score必须是0-100之间的数字
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            semester格式如：2023-2024-1
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="mb-4">
+                    <h5 class="mb-3">模板下载</h5>
+                    <p>您可以下载以下模板，填入成绩数据后上传：</p>
+                    <button type="button" class="btn btn-info" id="downloadTemplateBtn">
+                        <i class="bi bi-download me-1"></i>下载模板
+                    </button>
+                </div>
+                
+                <div class="mt-4">
+                    <h5 class="mb-3">文件预览</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>student_id</th>
+                                    <th>course_id</th>
+                                    <th>score</th>
+                                    <th>semester</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>S001</td>
+                                    <td>C001</td>
+                                    <td>85.5</td>
+                                    <td>2023-2024-1</td>
+                                </tr>
+                                <tr>
+                                    <td>S002</td>
+                                    <td>C001</td>
+                                    <td>92.0</td>
+                                    <td>2023-2024-1</td>
+                                </tr>
+                                <tr>
+                                    <td>S001</td>
+                                    <td>C002</td>
+                                    <td>78.5</td>
+                                    <td>2023-2024-1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="card border-left-warning shadow py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">注意事项</div>
+                                    <div class="mb-0">
+                                        如果CSV文件中的学生ID或课程ID不存在，导入将会失败。请确保先添加对应的学生和课程。
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-start mt-3 mb-5">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-1"></i>返回控制面板
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const form = document.getElementById('importForm');
+        
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            form.classList.add('was-validated');
+        });
+        
+        // Download template
+        document.getElementById('downloadTemplateBtn').addEventListener('click', function() {
+            // Create CSV content
+            const csvContent = "student_id,course_id,score,semester\nS001,C001,85.5,2023-2024-1\nS002,C001,92.0,2023-2024-1\nS001,C002,78.5,2023-2024-1";
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', '成绩导入模板.csv');
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    });
+</script>
+{% endblock %} 
